@@ -7,10 +7,8 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-example
+# Dependency directories
 node_modules
-dist
-dist-ssr
 *.local
 
 # Editor directories and files
@@ -23,3 +21,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build output
+demo/dist
+example
+dist
+dist-ssr
