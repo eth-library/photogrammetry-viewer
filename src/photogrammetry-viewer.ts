@@ -29,10 +29,6 @@ import {Vector3} from 'three';
 
 @customElement('photogrammetry-viewer')
 export class PhotogrammetryViewer extends LitElement {
-  // zup to yup applied
-  @property({type: Boolean})
-  isYupTransformApplied: boolean = false;
-
   // src file names:
   @property()
   src3D: string = ''; // 'http://localhost:8000/3D/Yup.gltf';
@@ -78,6 +74,8 @@ export class PhotogrammetryViewer extends LitElement {
   private _isInit: boolean = false;
 
   private _isColumnDir: boolean = false;
+
+  private _viewerUpdateToken: number = 0;
 
   private _resizeObserver: ResizeObserver;
 
@@ -187,6 +185,8 @@ export class PhotogrammetryViewer extends LitElement {
 
   firstUpdated() {
     this._resizeObserver.observe(this.viewerBase);
+    this._updateViewerSize();
+    requestAnimationFrame(() => this._updateViewerSize());
     this.viewer2DElement.connectWithSettings(this._viewerSettings);
     this.viewer3DElement.connectWithSettings(this._viewerSettings);
     this._viewerSettings.viewer2DElement = this.viewer2DElement;
@@ -207,10 +207,6 @@ export class PhotogrammetryViewer extends LitElement {
           alert('Invalid scan information file');
         }
       });
-    }
-
-    if (changedProperties.has('isYupTransformApplied')) {
-      this._imageCamera.setIsYupTransformApplied(this.isYupTransformApplied);
     }
 
     if (
@@ -261,7 +257,6 @@ export class PhotogrammetryViewer extends LitElement {
   private _handleScanInformationExtracted(): void {
     this._imageCamera.init(
         this._scanInformation,
-        this.isYupTransformApplied,
         this._viewerSettings.modelOrientation.eulerOrientationYXZInRad.angleInRad,
     );
     this.viewer2DElement.setImageFiles(this._scanInformation.imageFiles);
@@ -424,7 +419,8 @@ export class PhotogrammetryViewer extends LitElement {
     }
   }
 
-  private _updateViewer(): void {
+  private async _updateViewer(): Promise<void> {
+    const updateToken = ++this._viewerUpdateToken;
     const cam3DViewer = this.viewer3DElement.getCamera();
     [this._syncSettings2DViewer, this._syncSettings3DViewer] =
       this._imageCamera.getSyncSettingsOfNextBestImage(cam3DViewer);
@@ -440,7 +436,11 @@ export class PhotogrammetryViewer extends LitElement {
       this._syncSettings2DViewer.rotationAngle;
 
     const currentImageIdx = this._syncSettings2DViewer.imageIdx;
-    this.viewer2DElement.loadNextImage(currentImageIdx);
+    await this.viewer2DElement.loadNextImage(currentImageIdx);
+
+    if (updateToken != this._viewerUpdateToken) {
+      return;
+    }
 
     const currentSensor = this._imageCamera.getImageSensor(currentImageIdx);
     if (currentSensor == null) {

@@ -26,7 +26,6 @@ This library provides an HTML web component that displays photogrammetric data. 
 ## Element attributes
 Attribute | Description 
 ---|---
-isYupTransformApplied | indicates whether a z-up to y-up coordinate transformation has been subsequently performed.
 srcScanInformation | Exported cameras in xml file from Agisoft
 src3D | 3D model in gltf file format
 src2D | Path where all 2D images are located. Currently these must be in png format.
@@ -36,3 +35,7 @@ viewSettings | An object with additional settings to adjust the viewer. Currentl
 ## Measurements
 
 Measurements can be downloaded as CSV or JSON from within the measurement tool. In conjunction with the attribute `loadMeasurement`, the JSON file can be used to annotate the 3D model.
+
+## Funding Acknowledgement
+
+Funded by the German Research Foundation (DFG) within the project " Three-dimensional digitization of insect collections - multi-view imaging and photogrammetric surface reconstruction", Project number: [495869174](https://gepris.dfg.de/gepris/projekt/495869174?language=en)
