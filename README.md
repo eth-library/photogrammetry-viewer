@@ -12,7 +12,7 @@ This library provides an HTML web component that displays photogrammetric data. 
     <script src="https://cdn.jsdelivr.net/npm/@ulb-darmstadt/photogrammetry-viewer/dist/photogrammetry-viewer.js" type="module"></script>
   </head>
   <body>
-    <photogrammetry-viewer isYupTransformApplied
+    <photogrammetry-viewer
       srcScanInformation='http://localhost:8000/Leptinotarsa_decemlineata_NOKI_metashape_cameras.xml' 
       src3D = 'http://localhost:8000/Yup.gltf'
       src2D = 'http://localhost:8000/edof/'>
