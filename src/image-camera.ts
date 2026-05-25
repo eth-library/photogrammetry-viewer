@@ -14,6 +14,7 @@ export class ImageCamera extends EventEmitter {
   normedPositions: Array<Vector3> = [];
 
   private _remapCoordinates: Vector3 = new Vector3(0, 1, 2);
+  private _isYupTransformApplied: boolean = true;
 
   private _sensorMap = new Map<string, Sensor>();
   private _sensorIds: Array<string> = [];
@@ -22,14 +23,29 @@ export class ImageCamera extends EventEmitter {
   private _chunkToWorldTransform: Matrix4 = new Matrix4();
   private _additionalRotation: Matrix4 = new Matrix4();
 
-  init(scanInformation: ScanInformation, additionalRotation: Euler) {
+  init(
+      scanInformation: ScanInformation,
+      isYupTransformApplied: boolean,
+      additionalRotation: Euler,
+  ) {
     this._sensorMap = scanInformation.sensorMap;
     this._sensorIds = scanInformation.sensorIds;
 
     this._camPosesInChunk = scanInformation.camPosesInChunk;
     this._chunkToWorldTransform = scanInformation.transformationChunkToWorld;
+    this._isYupTransformApplied = isYupTransformApplied;
     this._additionalRotation = this._additionalRotation.makeRotationFromEuler(additionalRotation);
     this._calculateCamPosesInWorldCoor();
+  }
+
+  setIsYupTransformApplied(isYupTransformApplied: boolean): void {
+    if (isYupTransformApplied == this._isYupTransformApplied) {
+      return;
+    }
+
+    this._isYupTransformApplied = isYupTransformApplied;
+    this._calculateCamPosesInWorldCoor();
+    this.emit('camera-parameters-changed');
   }
 
   setAdditionalRotation(additionalRotation: EulerYXZ): void {
@@ -187,10 +203,12 @@ export class ImageCamera extends EventEmitter {
 
   private _calculateCamPosesInWorldCoor(): void {
     const transformationChunkToWorldYUp = this._chunkToWorldTransform.clone();
-    const transformationZupToYup = new Matrix4();
-    transformationZupToYup.makeRotationX(-Math.PI * 0.5);
+    if (this._isYupTransformApplied) {
+      const transformationZupToYup = new Matrix4();
+      transformationZupToYup.makeRotationX(-Math.PI * 0.5);
 
-    transformationChunkToWorldYUp.premultiply(transformationZupToYup);
+      transformationChunkToWorldYUp.premultiply(transformationZupToYup);
+    }
 
     const tmpPos = new Vector3();
     const tmpQuart = new Quaternion();
